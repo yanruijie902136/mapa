@@ -1,4 +1,4 @@
-# MAPA: MULTI-TURN ADAPTIVE PROMPTING ATTACK ON LARGE VISION-LANGUAGE MODELS
+# MAPA: Multi-Turn Adaptive Prompting Attack on Large Vision-Language Models
 
 ## How to run the project
 1. Download the models from Hugging Face and save them under the ```models``` folder. The mapping between the model name and model folder name is conducted by the ```model_name_to_path_type``` function in ```attack/hf_models/utils.py```.
