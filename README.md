@@ -5,5 +5,5 @@
 2. Create a Python virtual environment and enable it.
 3. Go into the ```attack``` folder, ```cd attack```.
 4. Install the dependencies according to ```attack/requirements.txt```.
-6. Run the model server. For example, ```python server.py --lvlm_name=llava --load_clip --load_sd --load_sem_relevance --port=8000.```
-7. Run the attack. For example, ```python main.py --lvlm_name=llava --dataset=harmbench --task_i_start_from=0 --num_tasks=60 --experiment_name=llava_test --port=8000```. 
+6. Run the model server. For example, ```python server.py --lvlm_name=llava --load_clip --load_sd --load_sem_relevance --port=8000```. There are three options for lvlm_name: "llava", "qwen" and "llama".
+7. Run the attack. For example, ```python main.py --dataset=harmbench --task_i_start_from=0 --num_tasks=60 --experiment_name=llava_test --port=8000```. Possible options of the ```dataset``` argument include "harmbench", "harmbench_tiny" and "jailbreakbench".
