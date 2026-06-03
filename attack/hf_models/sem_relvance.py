@@ -1,5 +1,4 @@
-from transformers import RobertaTokenizer, RobertaModel, BertTokenizer, BertModel
-from transformers import AutoTokenizer, AutoModel
+from transformers import RobertaConfig, RobertaTokenizer, RobertaModel
 import torch
 import os
 from dotenv import load_dotenv
@@ -19,7 +18,23 @@ class SemRelvance:
         print("Loading model: {}".format(self.model_name))
         model_path = os.path.join(MODEL_DIR, self.model_name)
         self.tokenizer = RobertaTokenizer.from_pretrained(model_path)
-        self.model = RobertaModel.from_pretrained(model_path)
+        config = RobertaConfig.from_pretrained(model_path)
+        self.model = RobertaModel(config)
+
+        # Transformers 5.x refuses to torch.load .bin checkpoints with torch<2.6.
+        # This checkpoint is tensor-only, so load it explicitly with weights_only=True.
+        state_dict = torch.load(
+            os.path.join(model_path, "pytorch_model.bin"),
+            map_location="cpu",
+            weights_only=True,
+        )
+        missing_keys, unexpected_keys = self.model.load_state_dict(state_dict, strict=False)
+        unexpected_keys = [key for key in unexpected_keys if key != "embeddings.position_ids"]
+        if missing_keys or unexpected_keys:
+            raise RuntimeError(
+                f"Failed to load {self.model_name}: missing={missing_keys}, unexpected={unexpected_keys}"
+            )
+        self.model.eval()
 
         return self.model, self.tokenizer
 

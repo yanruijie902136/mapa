@@ -6,6 +6,11 @@ import re
 
 class LLM(Agent):
     ENDPOINT = "llm_gen"
+    SMALL_MODEL_NAMES = {
+        "mistral": "mistral_7b",
+        "qwen2_5_7b": "qwen2_5_7b",
+        "llama3_1_8b": "llama3_1_8b",
+    }
 
     def __init__(self, model_name: str, max_new_tokens: int, temperature: float, top_p: float):
         super().__init__(model_name, max_new_tokens, temperature, top_p)
@@ -19,17 +24,33 @@ class LLM(Agent):
 
         return None
 
-    def get_generation_single(self, system_prompt, user_prompt, condition, is_small_model=False, port=None):
+    def build_prompt(self, system_prompt, user_prompt, condition):
+        if self.model_name == "qwen2_5_7b":
+            return (
+                f"<|im_start|>system\n{system_prompt}<|im_end|>\n"
+                f"<|im_start|>user\n{user_prompt}<|im_end|>\n"
+                f"<|im_start|>assistant\n{condition}"
+            )
+        if self.model_name == "llama3_1_8b":
+            return (
+                f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n"
+                f"{system_prompt}<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
+                f"{user_prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+                f"{condition}"
+            )
+
         conv = get_conversation_template(self.template_name)
         conv.set_system_message(system_prompt)
         conv.append_message(conv.roles[0], user_prompt)
         conv.append_message(conv.roles[1], condition)
+        return conv.get_prompt()
 
+    def get_generation_single(self, system_prompt, user_prompt, condition, is_small_model=False, port=None):
         payload = dict(max_new_tokens=self.max_new_tokens, temperature=self.temperature, top_p=self.top_p)
-        payload["full_prompt"] = conv.get_prompt()
+        payload["full_prompt"] = self.build_prompt(system_prompt, user_prompt, condition)
 
         if is_small_model:
-            payload["model_name"] = self.model_name + "_7b"
+            payload["model_name"] = self.SMALL_MODEL_NAMES.get(self.model_name, self.model_name)
         else:
             payload["model_name"] = self.model_name
 

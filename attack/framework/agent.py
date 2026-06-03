@@ -19,21 +19,29 @@ class Agent:
             else:
                 dispatch = requests.post
 
+            kwargs.setdefault("timeout", 300)
             response = dispatch(f"http://localhost:{port if port else commons.utils.PORT}/{endpoint}", **kwargs)
+            response.raise_for_status()
             response_text = response.text
             response_text = response_text.encode("utf-8").decode("unicode_escape")
 
             return response_text
         except requests.exceptions.HTTPError as http_err:
-            logger.error(f"HTTP error occurred: {http_err} - Response: {response.text}")
+            error_msg = f"HTTP error occurred: {http_err} - Response: {response.text}"
+            logger.error(error_msg)
+            raise RuntimeError(error_msg) from http_err
         except requests.exceptions.ConnectionError:
             logger.error("Error: Could not connect to the server.")
+            raise
         except requests.exceptions.Timeout:
             logger.error("Error: Request timed out.")
+            raise
         except requests.exceptions.RequestException as e:
             logger.error(f"Request failed: {e}")
+            raise
         except ValueError:
             logger.error("Error: Response is not valid JSON.")
+            raise
         except Exception as e:
             logger.error(e)
-        return None
+            raise

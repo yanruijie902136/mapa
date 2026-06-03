@@ -3,10 +3,9 @@ import gc
 from transformers import (
     LlavaNextForConditionalGeneration,
     LlavaNextProcessor,
-    AutoTokenizer,
     AutoProcessor,
+    AutoModelForImageTextToText,
     MllamaForConditionalGeneration,
-    Qwen2_5_VLForConditionalGeneration,
     MllamaForConditionalGeneration,
 )
 
@@ -21,7 +20,7 @@ class HuggingFaceLVLM:
             )
             self.processor = LlavaNextProcessor.from_pretrained(model_path)
         elif "qwen" in model_name:
-            self.lvlm = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+            self.lvlm = AutoModelForImageTextToText.from_pretrained(
                 model_path,
                 torch_dtype=torch.bfloat16,
                 device_map="auto",

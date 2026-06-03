@@ -9,7 +9,6 @@ from framework import (
     Agent,
     SemRelevance,
     StableDiffusion,
-    StrongRejectJudge,
     HarmbenchJudge,
     AttackVersion,
 )
@@ -43,9 +42,11 @@ class Action(Enum):
 
 def config():
     config = argparse.ArgumentParser()
-    config.add_argument("--attacker_model_name", type=str, default="mistral")
+    config.add_argument("--attacker_model_name", type=str, default="qwen2_5_7b")
+    config.add_argument("--inner_judge_model_name", type=str, default="llama3_1_8b")
+    config.add_argument("--final_judge_model_name", type=str, default="harmbench_mistral_cls")
     config.add_argument("--attacker_max_new_tokens", type=int, default=2000)
-    config.add_argument("--target_model_name", type=str, default="llava1.6")
+    config.add_argument("--target_model_name", type=str, default="qwen2_5_vl_3b")
     config.add_argument("--target_max_new_tokens", type=int, default=300)
     config.add_argument("--num_attempts", type=int, default=3)
     config.add_argument("--dataset", type=str, default="advbench_tiny")
@@ -218,7 +219,6 @@ def CoA_attack_pipeline(
     task: str,
     attacker: Attacker,
     judge: HarmbenchJudge,
-    stronreject_judge: StrongRejectJudge,
     my_judge: Judge,
     target: Target,
     library: Library,
@@ -294,7 +294,6 @@ def CoA_attack_pipeline(
                 attack_text_prompt = proposed_text_prompt
 
             response = target.get_response(attack_text_prompt, img)
-            # sem = stronreject_judge.eval(task, response)
             sem = sem_relevance.compute_similarity(task, response)
             logger.info(f"Response: {response}")
             logger.info(f"Similarity: {sem:.4f}")
@@ -340,7 +339,6 @@ def CoA_attack_pipeline(
 
         # The second round or above
         response_no_history = target.get_response_no_history(top_text_prompt, top_img)
-        # sem_no_history = stronreject_judge.eval(task, response_no_history)
         sem_no_history = sem_relevance.compute_similarity(task, response_no_history)
         logger.debug(f"Response from no history: {response_no_history}")
 
@@ -429,13 +427,14 @@ def CoA_attack_pipeline(
 def attacks(args, result_dir):
     # Strategy library
     library = Library()
-    library.load(args.library_name)
+    library_loaded = library.load(args.library_name) and bool(library.strategies_dict)
+    if not library_loaded:
+        logger.warning("Strategy library is unavailable or empty; continuing with retrieval disabled.")
 
     # Red team
     attacker = Attacker(args.rounds, args.attacker_model_name, args.attacker_max_new_tokens)
-    my_judge = Judge(attacker.model_name, attacker.max_new_tokens)
-    judge = HarmbenchJudge()
-    strongreject_judge = StrongRejectJudge()
+    my_judge = Judge(args.inner_judge_model_name, attacker.max_new_tokens)
+    judge = HarmbenchJudge(args.final_judge_model_name)
     sem_relevance = SemRelevance()
     strategy_extractor = StrategyExtractor(attacker.model_name, attacker.max_new_tokens)
 
@@ -521,7 +520,6 @@ def attacks(args, result_dir):
                 task,
                 attacker,
                 judge,
-                strongreject_judge,
                 my_judge,
                 target,
                 library,
@@ -533,14 +531,14 @@ def attacks(args, result_dir):
                 attempt_i,
                 args.rounds,
                 attack_versions=attack_versions,
-                enable_retrieval=not args.disable_retrieval,
+                enable_retrieval=library_loaded and not args.disable_retrieval,
                 disable_policy_selection=args.disable_policy_selection,
                 attack_chain_dict=given_attack_chains.get(task_i, None) if given_attack_chains else None,
             )
             jailbreak_score = my_judge.eval(task, last_response)
             sem = sem_relevance.compute_similarity(task, last_response)
 
-            judge_score = strongreject_judge.eval(task, last_response)
+            judge_score = float(is_success)
             last_response_cleaned = last_response.replace("\n", " ")
             result = {
                 "task_i": task_i,
@@ -560,7 +558,7 @@ def attacks(args, result_dir):
 
             results.append(result)
             result_logger.info(
-                f"\tAttempt {attempt_i+1}: {'Success' if is_success else 'Failure'}, Judge score: {judge_score}, Jailbreak score: {jailbreak_score}, Similarity: {sem}, Rounds num: {rounds_num}, Steps num: {steps_num}, Total target query: {result['total_target_query']} - Last response: {last_response_cleaned}"
+                f"\tAttempt {attempt_i+1}: {'Success' if is_success else 'Failure'}, Final judge score: {judge_score}, Inner judge score: {jailbreak_score}, Similarity: {sem}, Rounds num: {rounds_num}, Steps num: {steps_num}, Total target query: {result['total_target_query']} - Last response: {last_response_cleaned}"
             )
 
             # Conclusion of the attack attempt
