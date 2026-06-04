@@ -1,0 +1,27 @@
+2026-06-03 21:17:15,000 - INFO - Batch 0-59  - Binary ASR: 0.72, Average ASR: 0.7167, Average max score: 0.7167, Average successful rounds num: 3.7209, Average successful steps num: 5.4186, Average successful jailbreak score: 6.8372, Average jailbreak score: 5.6000, Average successful similarity: 0.6904, Average failed similarity: 0.5999, Average similarity: 0.6648, Average total target query in success: 18.5116, Average total target query to get success: 18.5116
+2026-06-03 21:17:15,001 - INFO - Attack version stats: 
+defaultdict(<function cal_stats.<locals>.<lambda> at 0x7950d98325f0>,
+            {'FULL': [27, 19, 8, 9, 4, 2, 1, 0, 0, 0],
+             'NO_TEXT_CONN': [9, 13, 15, 10, 6, 1, 0, 0, 0, 0],
+             'NO_VISION': [7, 9, 12, 5, 1, 1, 1, 0, 0, 0]})
+2026-06-03 21:17:15,005 - INFO - ------Summary for qwen2_5_vl_3b_harmbench on harmbench with tasks interval 60------
+2026-06-03 21:17:15,005 - INFO - Total number of tasks summarized: 60
+2026-06-03 21:17:15,005 - INFO - Total number of samples summarized: 60
+2026-06-03 21:17:15,005 - INFO - Binary ASR: 0.7166666666666667
+2026-06-03 21:17:15,005 - INFO - Average ASR: 0.7166666666666667
+2026-06-03 21:17:15,005 - INFO - Average max Score: 0.7166666666666667
+2026-06-03 21:17:15,005 - INFO - Average successful rounds_num: 3.7209302325581395
+2026-06-03 21:17:15,005 - INFO - Average successful steps_num: 5.4186046511627906
+2026-06-03 21:17:15,005 - INFO - Average successful jailbreak score: 6.837209302325581
+2026-06-03 21:17:15,005 - INFO - Average jailbreak score: 5.6
+2026-06-03 21:17:15,005 - INFO - Average successful similarity: 0.6904250487338665
+2026-06-03 21:17:15,005 - INFO - Average failed similarity: 0.5999288050567403
+2026-06-03 21:17:15,005 - INFO - Average similarity: 0.6647844463586807
+2026-06-03 21:17:15,005 - INFO - Average total target query in success: 18.511627906976745
+2026-06-03 21:17:15,005 - INFO - Average total target query to get success: 18.511627906976745
+2026-06-03 21:17:15,005 - INFO - Attack version stats: 
+defaultdict(<function cal_stats.<locals>.<lambda> at 0x7950d9858d30>,
+            {'FULL': [27, 19, 8, 9, 4, 2, 1, 0, 0, 0],
+             'NO_TEXT_CONN': [9, 13, 15, 10, 6, 1, 0, 0, 0, 0],
+             'NO_VISION': [7, 9, 12, 5, 1, 1, 1, 0, 0, 0]})
+2026-06-03 21:17:15,006 - INFO - Summary saved to /home/yanruijie/mapa/attack/results/qwen2_5_vl_3b_harmbench/summary.csv
