@@ -1,0 +1,2 @@
+batch,binary_asr,average_asr,average_max_score,average_rounds_num_in_success,average_steps_num_in_success,average_success_jailbreak_score,average_jailbreak_score,average_success_sem,average_failure_sem,average_sem,average_total_target_query_in_success,average_total_target_query_to_get_success
+0-59,0.55,0.55,0.55,3.909090909090909,5.515151515151516,3.727272727272727,2.9,0.6660846354383411,0.6406585927362796,0.6546429162224133,18.424242424242426,18.424242424242426
